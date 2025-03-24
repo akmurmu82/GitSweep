@@ -55,4 +55,21 @@ app.get("/repos", (req, res) => {
         .catch((err) => res.status(500).json(err));
 });
 
+app.get("/auth/user", (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ user: req.user.profile, isLoggedIn: true });
+    } else {
+        res.json({ isLoggedIn: false });
+    }
+});
+
+app.get("/auth/logout", (req, res) => {
+    req.logout((err) => {
+        if (err) return res.status(500).json({ error: "Logout failed" });
+        res.redirect("http://localhost:5173/");
+    });
+});
+
+
+
 app.listen(5000, () => console.log("Server running on http://localhost:5000"));
