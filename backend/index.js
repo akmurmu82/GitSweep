@@ -47,7 +47,7 @@ app.get(
 app.get("/repos", (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
-    fetch("https://api.github.com/user/repos", {
+    fetch("https://api.github.com/user/repos?per_page=100", {
         headers: { Authorization: `token ${req.user.accessToken}` },
     })
         .then((response) => response.json())
