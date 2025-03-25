@@ -126,5 +126,5 @@ This project is open-source and available under the MIT License.
 
 ---
 
-For any issues or feature requests, feel free to open an issue on [GitHub](https://github.com/your-username/GitSweep/issues).
+For any issues or feature requests, feel free to open an issue on [GitHub](https://github.com/akmurmu82/GitSweep/issues).
 
