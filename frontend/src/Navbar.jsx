@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setFilterType, setSearchQuery } from "./redux/features/slices/repoSlice";
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Navbar = () => {
     const dispatch = useDispatch();
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/auth/user", { withCredentials: true })
+        axios.get(`${backendUrl}/auth/user`, { withCredentials: true })
             .then((res) => {
                 if (res.data.isLoggedIn) {
                     setUser(res.data.user);
@@ -18,7 +19,7 @@ const Navbar = () => {
     }, []);
 
     const handleLogout = () => {
-        window.open("http://localhost:5000/auth/logout", "_self");
+        window.open(`${backendUrl}/auth/logout`, "_self");
     };
 
     return (
@@ -35,8 +36,8 @@ const Navbar = () => {
                             className="w-10 h-10 border rounded-full border-white"
                         />
                         <span className="text-sm">{user.username}</span>
-                        <button 
-                            onClick={handleLogout} 
+                        <button
+                            onClick={handleLogout}
                             className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm transition"
                         >
                             Logout

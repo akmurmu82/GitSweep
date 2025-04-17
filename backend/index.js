@@ -32,6 +32,9 @@ passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
 app.get("/auth/github", passport.authenticate("github"));
+app.get("/", (req, res) => {
+    res.send({ message: "Welcome to the GitHub Auth API!" });
+});
 
 app.get(
     "/auth/github/callback",
