@@ -9,7 +9,7 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: "https://git-sweep.vercel.app", credentials: true }));
 app.use(session({ secret: "github-secret", resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -41,7 +41,7 @@ app.get(
     passport.authenticate("github", { failureRedirect: "/" }),
     (req, res) => {
         // Send accessToken to the frontend after login
-        res.redirect(`http://localhost:5173/dashboard?token=${req.user.accessToken}`);
+        res.redirect(`https://git-sweep.vercel.app/dashboard?token=${req.user.accessToken}`);
         // res.redirect("http://localhost:5173/dashboard"); // Redirect to frontend after login
     }
 );
@@ -69,7 +69,7 @@ app.get("/auth/user", (req, res) => {
 app.get("/auth/logout", (req, res) => {
     req.logout((err) => {
         if (err) return res.status(500).json({ error: "Logout failed" });
-        res.redirect("http://localhost:5173/");
+        res.redirect("https://git-sweep.vercel.app");
     });
 });
 
