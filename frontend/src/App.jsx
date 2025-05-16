@@ -28,8 +28,9 @@ function App() {
     const token = params.get("token");
 
     if (token) {
+      console.log(token);
       setAccessToken(token);
-      localStorage.setItem("accessToken", token);
+      localStorage.setItem("accessToken", accessToken);
       window.history.replaceState({}, document.title, "/dashboard");
     } else {
       const storedToken = localStorage.getItem("accessToken");
@@ -60,17 +61,19 @@ function App() {
         <h2 className="text-xl font-bold mb-4">Your personal assistant for GitHub repo management</h2>
 
         {/* Filter Buttons & Search Bar */}
-        <div className="flex gap-3 mb-6 align-center">
-          {["All", "Private", "Forked", "Public"].map((type) => (
-            <button
-              key={type}
-              onClick={() => setFilter(type)}
-              className={`rounded text-sm font-semibold transition ${filter === type ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-gray-400"
-                }`}
-            >
-              {type}
-            </button>
-          ))}
+        <div className="flex flex-col mb-6 align-center">
+          <div className="flex gap-2 align-center mb-1">
+            {["All", "Private", "Forked", "Public"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilter(type)}
+                className={`rounded text-sm font-semibold transition ${filter === type ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-gray-400"
+                  }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
           <input
             type="text"
             placeholder="Search repositories..."

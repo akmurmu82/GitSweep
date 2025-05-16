@@ -4,12 +4,15 @@ import session from "express-session";
 import GitHubStrategy from "passport-github2";
 import dotenv from "dotenv";
 import cors from "cors";
+const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+const client = process.env.CLIENT || "http://localhost:5173";
+const port = process.env.PORT || 5173;
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: "https://git-sweep.vercel.app", credentials: true }));
+app.use(cors({ origin: client, credentials: true }));
 app.use(session({ secret: "github-secret", resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -19,7 +22,7 @@ passport.use(
         {
             clientID: process.env.GITHUB_CLIENT_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            callbackURL: "https://gitsweep.onrender.com/auth/github/callback",
+            callbackURL: `${backendUrl}/auth/github/callback`,
             scope: ["repo", "delete_repo", "user"], // Add "delete_repo" scope to delete repos
         },
         (accessToken, refreshToken, profile, done) => {
@@ -41,7 +44,7 @@ app.get(
     passport.authenticate("github", { failureRedirect: "/" }),
     (req, res) => {
         // Send accessToken to the frontend after login
-        res.redirect(`https://git-sweep.vercel.app/dashboard?token=${req.user.accessToken}`);
+        res.redirect(`${client}/dashboard?token=${req.user.accessToken}`);
         // res.redirect("http://localhost:5173/dashboard"); // Redirect to frontend after login
     }
 );
@@ -69,10 +72,8 @@ app.get("/auth/user", (req, res) => {
 app.get("/auth/logout", (req, res) => {
     req.logout((err) => {
         if (err) return res.status(500).json({ error: "Logout failed" });
-        res.redirect("https://git-sweep.vercel.app");
+        res.redirect(client);
     });
 });
 
-
-
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+app.listen(process.env.PORT, () => console.log(`Server running on ${port}`));

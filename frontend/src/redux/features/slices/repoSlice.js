@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 // Fetch Repos from Backend
 export const fetchRepos = createAsyncThunk("repos/fetchRepos", async () => {
