@@ -19,7 +19,7 @@ passport.use(
         {
             clientID: process.env.GITHUB_CLIENT_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            callbackURL: "http://localhost:5000/auth/github/callback",
+            callbackURL: "https://gitsweep.onrender.com/auth/github/callback",
             scope: ["repo", "delete_repo", "user"], // Add "delete_repo" scope to delete repos
         },
         (accessToken, refreshToken, profile, done) => {
