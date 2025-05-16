@@ -45,7 +45,7 @@ const Navbar = () => {
                     </>
                 ) : (
                     <button
-                        onClick={() => window.open(`${VITE_BACKEND_URL}/auth/github`, "_self")}
+                        onClick={() => window.open(`${backendUrl}/auth/github`, "_self")}
                         className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm transition"
                     >
                         Login with GitHub
