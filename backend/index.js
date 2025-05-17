@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 const client = process.env.CLIENT || "http://localhost:5173";
-const port = process.env.PORT || 5173;
+const port = process.env.PORT || 8080;
 
 dotenv.config();
 
@@ -44,6 +44,7 @@ app.get(
     passport.authenticate("github", { failureRedirect: "/" }),
     (req, res) => {
         // Send accessToken to the frontend after login
+        console.log(req.user, req.user.accessToken);
         res.redirect(`${client}/dashboard?token=${req.user.accessToken}`);
         // res.redirect("http://localhost:5173/dashboard"); // Redirect to frontend after login
     }
@@ -76,4 +77,4 @@ app.get("/auth/logout", (req, res) => {
     });
 });
 
-app.listen(process.env.PORT, () => console.log(`Server running on ${port}`));
+app.listen(port, () => console.log(`Server running on ${port}`));
