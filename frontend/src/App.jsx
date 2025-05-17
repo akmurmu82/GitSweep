@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRepos } from "./redux/features/slices/repoSlice";
+import RepoCardSkeleton from "./components/RepoCardSkeleton";
 
 function App() {
   const dispatch = useDispatch();
@@ -86,7 +87,9 @@ function App() {
         {/* Repository Listing */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {status === "loading" ? (
-            <p>Loading repositories...</p>
+            Array.from({ length: 6 }).map((_, i) => (
+              <RepoCardSkeleton key={i} />
+            ))
           ) : filteredRepos.length > 0 ? (
             filteredRepos.map((repo) => (
               <RepoCard key={repo.id} repo={repo} handleDelete={handleDelete} />
