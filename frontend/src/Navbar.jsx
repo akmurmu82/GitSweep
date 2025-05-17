@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { setFilterType, setSearchQuery } from "./redux/features/slices/repoSlice";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 const Navbar = () => {
     const dispatch = useDispatch();
@@ -17,6 +17,9 @@ const Navbar = () => {
             .then((res) => {
                 if (res.data.isLoggedIn) {
                     setUser(res.data.user);
+                    console.log(res.data.user);
+                    dispatch(setFilterType("all"));
+                    dispatch(setSearchQuery(""));
                 }
             })
             .catch((err) => console.log(err));
