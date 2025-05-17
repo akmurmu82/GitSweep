@@ -24,6 +24,7 @@ function App() {
     deleteSelectedRepos(repoFullName, dispatch);
   };
 
+  // Check for access token in URL and local storage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
@@ -31,7 +32,7 @@ function App() {
     if (token) {
       console.log(token);
       setAccessToken(token);
-      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("accessToken", token);
       window.history.replaceState({}, document.title, "/dashboard");
     } else {
       const storedToken = localStorage.getItem("accessToken");
