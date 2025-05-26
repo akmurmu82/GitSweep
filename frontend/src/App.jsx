@@ -24,23 +24,46 @@ function App() {
     deleteSelectedRepos(repoFullName, dispatch);
   };
 
-  // Check for access token in URL and local storage
-  useEffect(() => {
+  // // Check for access token in URL and local storage
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const token = params.get("token");
+
+  //   if (token) {
+  //     console.log(token);
+  //     setAccessToken(token);
+  //     localStorage.setItem("accessToken", token);
+  //     window.history.replaceState({}, document.title, "/dashboard");
+  //   } else {
+  //     const storedToken = localStorage.getItem("accessToken");
+  //     if (storedToken) {
+  //       setAccessToken(storedToken);
+  //     }
+  //   }
+  // }, []);
+
+   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
 
     if (token) {
-      console.log(token);
+      console.log("Token from URL:", token);
       setAccessToken(token);
-      localStorage.setItem("accessToken", token);
+
+      // Store token in cookies (expires in 7 days)
+      document.cookie = `accessToken=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+
+      // Optional: remove token from URL
       window.history.replaceState({}, document.title, "/dashboard");
     } else {
-      const storedToken = localStorage.getItem("accessToken");
-      if (storedToken) {
-        setAccessToken(storedToken);
+      // Try to read token from cookies
+      const match = document.cookie.match(/(^| )accessToken=([^;]+)/);
+      if (match) {
+        const cookieToken = match[2];
+        setAccessToken(cookieToken);
       }
     }
-  }, []);
+  }, [setAccessToken]);
 
   // Filtering repositories based on selection
   const filteredRepos = filteredList.filter((repo) => {

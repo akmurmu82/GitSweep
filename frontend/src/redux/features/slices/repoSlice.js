@@ -8,7 +8,7 @@ export const fetchRepos = createAsyncThunk("repos/fetchRepos", async () => {
     return response.data;
 });
 
-const repoSlice = createSlice({
+const repoSlice = createSlice({  
     name: "repos",
     initialState: {
         list: [],

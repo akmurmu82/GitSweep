@@ -3,6 +3,8 @@
 ## Overview
 This frontend allows users to authenticate via GitHub and manage their repositories, including deleting selected repositories.
 
+👉 Rename `.env.example` to `.env` and fill in the required environment variable values before running the project.
+
 ## Setup
 
 1. Clone the repository.
