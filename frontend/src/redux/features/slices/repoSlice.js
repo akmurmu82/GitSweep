@@ -3,9 +3,17 @@ import axios from "axios";
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 // Fetch Repos from Backend
-export const fetchRepos = createAsyncThunk("repos/fetchRepos", async () => {
+export const fetchRepos = createAsyncThunk("repos/fetchRepos", async (_, thunkAPI) => {
+  try {
     const response = await axios.get(`${backendUrl}/repos`, { withCredentials: true });
     return response.data;
+  } catch (error) {
+    // Optionally log or handle error
+    console.error("Failed to fetch repos:", error);
+
+    // Reject with error message to use in extraReducers
+    return thunkAPI.rejectWithValue(error.response?.data?.error || "Failed to fetch repositories");
+  }
 });
 
 const repoSlice = createSlice({  
