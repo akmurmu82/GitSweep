@@ -44,9 +44,8 @@ app.get(
     passport.authenticate("github", { failureRedirect: "/" }),
     (req, res) => {
         // Send accessToken to the frontend after login
-        console.log(req.user, req.user.accessToken);
-        res.redirect(`${client}/dashboard?token=${req.user.accessToken}`);
-        // res.redirect("http://localhost:5173/dashboard"); // Redirect to frontend after login
+        console.log(`access token:${req.user, req.user.accessToken}`);
+        res.redirect(`${client}/dashboard?token=${req.user.accessToken}`); // Redirect to frontend after login
     }
 );
 
