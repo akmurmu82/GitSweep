@@ -12,60 +12,40 @@ import RepoCardSkeleton from "./components/RepoCardSkeleton";
 function App() {
   const dispatch = useDispatch();
   const { filteredList, status } = useSelector((state) => state.repos);
+
   const [accessToken, setAccessToken] = useState(null);
+  const [user, setUser] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch user info on initial load
   useEffect(() => {
-    dispatch(fetchRepos());
-  }, [dispatch]);
+    axios
+      .get("http://localhost:8080/auth/user", { withCredentials: true })
+      .then((res) => {
+        if (res.data.isLoggedIn) {
+          setUser(res.data.user);
+          setAccessToken("valid"); // Token exists server-side
+        }
+      })
+      .catch((err) => console.log("❌ User fetch failed:", err))
+      .finally(() => setUserLoading(false));
+  }, []);
+
+  // Fetch repos once user is authenticated
+  useEffect(() => {
+    if (accessToken && !userLoading) {
+      console.log("🔑 User verified, fetching repos...");
+      dispatch(fetchRepos());
+    }
+  }, [dispatch, accessToken, userLoading]);
 
   const handleDelete = (repoFullName) => {
     deleteSelectedRepos(repoFullName, dispatch);
   };
 
-  // // Check for access token in URL and local storage
-  // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const token = params.get("token");
-
-  //   if (token) {
-  //     console.log(token);
-  //     setAccessToken(token);
-  //     localStorage.setItem("accessToken", token);
-  //     window.history.replaceState({}, document.title, "/dashboard");
-  //   } else {
-  //     const storedToken = localStorage.getItem("accessToken");
-  //     if (storedToken) {
-  //       setAccessToken(storedToken);
-  //     }
-  //   }
-  // }, []);
-
-   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-
-    if (token) {
-      console.log("Token from URL:", token);
-      setAccessToken(token);
-
-      // Store token in cookies (expires in 7 days)
-      document.cookie = `accessToken=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
-
-      // Optional: remove token from URL
-      window.history.replaceState({}, document.title, "/dashboard");
-    } else {
-      // Try to read token from cookies
-      const match = document.cookie.match(/(^| )accessToken=([^;]+)/);
-      if (match) {
-        const cookieToken = match[2];
-        setAccessToken(cookieToken);
-      }
-    }
-  }, [setAccessToken]);
-
-  // Filtering repositories based on selection
+  // Filtered list based on type and search input
   const filteredRepos = filteredList.filter((repo) => {
     const matchesFilter =
       filter === "All" ||
@@ -82,8 +62,11 @@ function App() {
     <div>
       <Navbar />
       <ToastContainer position="top-right" autoClose={3000} />
+
       <div className="p-6 mt-20">
-        <h2 className="text-xl font-bold mb-4">Your personal assistant for GitHub repo management</h2>
+        <h2 className="text-xl font-bold mb-4">
+          Your personal assistant for GitHub repo management
+        </h2>
 
         {/* Filter Buttons & Search Bar */}
         <div className="flex flex-col mb-6 align-center">
@@ -92,7 +75,9 @@ function App() {
               <button
                 key={type}
                 onClick={() => setFilter(type)}
-                className={`rounded text-sm font-semibold transition ${filter === type ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-gray-400"
+                className={`rounded text-sm font-semibold px-4 py-2 transition ${filter === type
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-300 text-black hover:bg-gray-400"
                   }`}
               >
                 {type}
@@ -110,10 +95,10 @@ function App() {
 
         {/* Repository Listing */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {status === "loading" ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <RepoCardSkeleton key={i} />
-            ))
+          {userLoading ? (
+            <p>Loading user info...</p>
+          ) : status === "loading" ? (
+            Array.from({ length: 6 }).map((_, i) => <RepoCardSkeleton key={i} />)
           ) : filteredRepos.length > 0 ? (
             filteredRepos.map((repo) => (
               <RepoCard key={repo.id} repo={repo} handleDelete={handleDelete} />

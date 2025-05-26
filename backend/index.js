@@ -1,21 +1,21 @@
 import express from "express";
 import passport from "passport";
-import session from "express-session";
+import cookieParser from "cookie-parser";
 import GitHubStrategy from "passport-github2";
 import dotenv from "dotenv";
 import cors from "cors";
-const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
-const client = process.env.CLIENT || "http://localhost:5173";
-const port = process.env.PORT || 8080;
+import axios from "axios";
 
 dotenv.config();
 
 const app = express();
+const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+const client = process.env.CLIENT || "http://localhost:5173";
+const port = process.env.PORT || 8080;
 
+app.use(cookieParser());
 app.use(cors({ origin: client, credentials: true }));
-app.use(session({ secret: "github-secret", resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
-app.use(passport.session());
 
 passport.use(
     new GitHubStrategy(
@@ -23,7 +23,7 @@ passport.use(
             clientID: process.env.GITHUB_CLIENT_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
             callbackURL: `${backendUrl}/auth/github/callback`,
-            scope: ["repo", "delete_repo", "user"], // Add "delete_repo" scope to delete repos
+            scope: ["repo", "delete_repo", "user"],
         },
         (accessToken, refreshToken, profile, done) => {
             return done(null, { profile, accessToken });
@@ -31,49 +31,69 @@ passport.use(
     )
 );
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
-
 app.get("/", (req, res) => {
-    res.send({ message: "Welcome to the GitHub Auth API!" });
+    res.send({ message: "✅ GitHub Auth API (stateless mode)" });
 });
+
 app.get("/auth/github", passport.authenticate("github"));
 
 app.get(
     "/auth/github/callback",
-    passport.authenticate("github", { failureRedirect: "/" }),
+    passport.authenticate("github", { session: false, failureRedirect: "/" }),
     (req, res) => {
-        // Send accessToken to the frontend after login
-        console.log(`access token:${req.user, req.user.accessToken}`);
-        res.redirect(`${client}/dashboard?token=${req.user.accessToken}`); // Redirect to frontend after login
+        const token = req.user.accessToken;
+        const username = req.user.profile.username;
+
+        res.cookie("accessToken", token, {
+            httpOnly: true,
+            sameSite: "lax", // change to "none" + secure:true if HTTPS + cross-site
+            secure: false,   // true in production HTTPS
+        });
+
+        console.log(`🔑 GitHub Login: ${username}`);
+        res.redirect(`${client}/dashboard`);
     }
 );
 
-// Endpoint to get user's repositories
-app.get("/repos", (req, res) => {
-    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+app.get("/auth/user", async (req, res) => {
+    const token = req.cookies?.accessToken;
+    if (!token) return res.status(401).json({ isLoggedIn: false });
 
-    fetch("https://api.github.com/user/repos?per_page=100", {
-        headers: { Authorization: `token ${req.user.accessToken}` },
-    })
-        .then((response) => response.json())
-        .then((data) => res.json(data))
-        .catch((err) => res.status(500).json(err));
+    try {
+        const response = await axios.get("https://api.github.com/user", {
+            headers: { Authorization: `token ${token}` },
+        });
+
+        res.json({ user: response.data, isLoggedIn: true });
+    } catch (error) {
+        res.status(401).json({ isLoggedIn: false, error: "Failed to fetch user" });
+    }
 });
 
-app.get("/auth/user", (req, res) => {
-    if (req.isAuthenticated()) {
-        res.json({ user: req.user.profile, isLoggedIn: true });
-    } else {
-        res.json({ isLoggedIn: false });
+app.get("/repos", async (req, res) => {
+    const token = req.cookies?.accessToken;
+    if (!token) return res.status(401).json({ error: "No token found" });
+
+    try {
+        const response = await axios.get(
+            "https://api.github.com/user/repos?per_page=100",
+            {
+                headers: { Authorization: `token ${token}` },
+            }
+        );
+
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: "GitHub API error" });
     }
 });
 
 app.get("/auth/logout", (req, res) => {
-    req.logout((err) => {
-        if (err) return res.status(500).json({ error: "Logout failed" });
-        res.redirect(client);
+    res.clearCookie("accessToken", {
+        sameSite: "lax",
+        secure: false, // match your cookie config
     });
+    res.redirect(client);
 });
 
-app.listen(port, () => console.log(`Server running on ${port}`));
+app.listen(port, () => console.log(`🚀 Server running on ${port}`));

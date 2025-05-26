@@ -10,6 +10,7 @@ const Navbar = () => {
     const dispatch = useDispatch();
     const [user, setUser] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         axios
@@ -17,17 +18,25 @@ const Navbar = () => {
             .then((res) => {
                 if (res.data.isLoggedIn) {
                     setUser(res.data.user);
-                    console.log(res.data.user);
                     dispatch(setFilterType("all"));
                     dispatch(setSearchQuery(""));
                 }
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.log(err))
+            .finally(() => setLoading(false));
     }, []);
 
     const handleLogout = () => {
         window.open(`${backendUrl}/auth/logout`, "_self");
     };
+
+    // Loading skeleton JSX for avatar and username
+    const UserSkeleton = () => (
+        <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gray-600 animate-pulse"></div>
+            <div className="h-5 w-20 bg-gray-600 rounded animate-pulse"></div>
+        </div>
+    );
 
     return (
         <nav className="bg-gray-800 text-white p-4 fixed top-0 w-full shadow-md z-50">
@@ -44,14 +53,16 @@ const Navbar = () => {
 
                 {/* Desktop user info */}
                 <div className="hidden md:flex items-center gap-3">
-                    {user ? (
+                    {loading ? (
+                        <UserSkeleton />
+                    ) : user ? (
                         <>
                             <img
-                                src={user.photos[0].value}
-                                alt={`${user.username}'s profile`}
+                                src={user.avatar_url}
+                                alt={`${user.login}'s profile`}
                                 className="w-10 h-10 border rounded-full border-white"
                             />
-                            <span className="text-sm">{user.username}</span>
+                            <span className="text-sm">{user.login}</span>
                             <button
                                 onClick={handleLogout}
                                 className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm transition"
@@ -73,15 +84,17 @@ const Navbar = () => {
             {/* Mobile dropdown */}
             {menuOpen && (
                 <div className="md:hidden mt-3 flex flex-col gap-3 items-start bg-gray-700 p-4 rounded shadow-md">
-                    {user ? (
+                    {loading ? (
+                        <UserSkeleton />
+                    ) : user ? (
                         <>
                             <div className="flex items-center gap-2">
                                 <img
-                                    src={user.photos[0].value}
-                                    alt={`${user.username}'s profile`}
+                                    src={user.avatar_url}
+                                    alt={`${user.login}'s profile`}
                                     className="w-8 h-8 border rounded-full border-white"
                                 />
-                                <span className="text-sm">{user.username}</span>
+                                <span className="text-sm">{user.login}</span>
                             </div>
                             <button
                                 onClick={handleLogout}
