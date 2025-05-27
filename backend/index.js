@@ -44,11 +44,18 @@ app.get(
         const token = req.user.accessToken;
         const username = req.user.profile.username;
 
-        res.cookie("accessToken", token, {
+        // res.cookie("accessToken", token, {
+        //     httpOnly: true,
+        //     sameSite: "lax", // change to "none" + secure:true if HTTPS + cross-site
+        //     secure: false,   // true in production HTTPS
+        // });
+        res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "lax", // change to "none" + secure:true if HTTPS + cross-site
-            secure: false,   // true in production HTTPS
+            sameSite: "None", // needed for cross-origin cookies
+            secure: true,     // needed on HTTPS
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
+
 
         console.log(`🔑 GitHub Login: ${username}`);
         res.redirect(`${client}/dashboard`);
