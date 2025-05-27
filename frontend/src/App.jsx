@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRepos } from "./redux/features/slices/repoSlice";
 import RepoCardSkeleton from "./components/RepoCardSkeleton";
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 function App() {
   const dispatch = useDispatch();
@@ -22,7 +23,7 @@ function App() {
   // Fetch user info on initial load
   useEffect(() => {
     axios
-      .get("http://localhost:8080/auth/user", { withCredentials: true })
+      .get(`${backendUrl}/auth/user`, { withCredentials: true })
       .then((res) => {
         if (res.data.isLoggedIn) {
           setUser(res.data.user);
