@@ -49,11 +49,11 @@ app.get(
         //     sameSite: "lax", // change to "none" + secure:true if HTTPS + cross-site
         //     secure: false,   // true in production HTTPS
         // });
-        res.cookie("token", token, {
+        res.cookie("accessToken", token, {
             httpOnly: true,
-            sameSite: "None", // needed for cross-origin cookies
-            secure: true,     // needed on HTTPS
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
+            sameSite: "None",
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000,
         });
 
 
@@ -62,8 +62,25 @@ app.get(
     }
 );
 
+// app.get("/auth/user", async (req, res) => {
+//     const token = req.cookies?.accessToken;
+//     if (!token) return res.status(401).json({ isLoggedIn: false });
+
+//     try {
+//         const response = await axios.get("https://api.github.com/user", {
+//             headers: { Authorization: `token ${token}` },
+//         });
+
+//         res.json({ user: response.data, isLoggedIn: true });
+//     } catch (error) {
+//         res.status(401).json({ isLoggedIn: false, error: "Failed to fetch user" });
+//     }
+// });
 app.get("/auth/user", async (req, res) => {
-    const token = req.cookies?.accessToken;
+    res.setHeader("Access-Control-Allow-Origin", client);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+
+    const token = req.cookies?.token; // FIX: use "token" instead of "accessToken"
     if (!token) return res.status(401).json({ isLoggedIn: false });
 
     try {
@@ -76,6 +93,7 @@ app.get("/auth/user", async (req, res) => {
         res.status(401).json({ isLoggedIn: false, error: "Failed to fetch user" });
     }
 });
+
 
 app.get("/repos", async (req, res) => {
     const token = req.cookies?.accessToken;
