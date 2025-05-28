@@ -11,10 +11,11 @@ dotenv.config();
 const app = express();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 const client = process.env.CLIENT || "http://localhost:5173";
+console.log("client:", client)
 const port = process.env.PORT || 8080;
 
-app.use(cookieParser());
 app.use(cors({ origin: client, credentials: true }));
+app.use(cookieParser());
 app.use(passport.initialize());
 
 passport.use(
@@ -66,7 +67,7 @@ app.get(
 app.get("/auth/user", async (req, res) => {
     // 1. Try to extract the access token from cookies
     const token = req.cookies?.accessToken;
-    console.log("🔍 [DEBUG] The req:",req)
+    // console.log("🔍 [DEBUG] The req:",req)
     console.log("🔍 [DEBUG] Extracted cookies:",req.cookies)
     console.log("🔍 [DEBUG] Extracted token from cookies:", token);
 
