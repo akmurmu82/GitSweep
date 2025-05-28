@@ -66,6 +66,8 @@ app.get(
 app.get("/auth/user", async (req, res) => {
     // 1. Try to extract the access token from cookies
     const token = req.cookies?.accessToken;
+    console.log("🔍 [DEBUG] The req:",req)
+    console.log("🔍 [DEBUG] Extracted cookies:",req.cookies)
     console.log("🔍 [DEBUG] Extracted token from cookies:", token);
 
     // 2. If no token is found, respond with unauthorized
