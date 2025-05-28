@@ -64,20 +64,34 @@ app.get(
 );
 
 app.get("/auth/user", async (req, res) => {
+    // 1. Try to extract the access token from cookies
     const token = req.cookies?.accessToken;
-    // console.log('token:', token)
-    if (!token) return res.status(401).json({ isLoggedIn: false });
+    console.log("🔍 [DEBUG] Extracted token from cookies:", token);
+
+    // 2. If no token is found, respond with unauthorized
+    if (!token) {
+        console.warn("⚠️ [WARN] No access token found in cookies.");
+        return res.status(401).json({ isLoggedIn: false, message: "Access token missing" });
+    }
 
     try {
+        // 3. Make a request to GitHub API to fetch the user's profile
         const response = await axios.get("https://api.github.com/user", {
             headers: { Authorization: `token ${token}` },
         });
 
+        console.log("✅ [INFO] GitHub user fetched successfully:", response.data.login);
+
+        // 4. Send user data and login status
         res.json({ user: response.data, isLoggedIn: true });
+
     } catch (error) {
+        // 5. If token is invalid or request fails
+        console.error("❌ [ERROR] Failed to fetch GitHub user:", error.response?.data || error.message);
         res.status(401).json({ isLoggedIn: false, error: "Failed to fetch user" });
     }
 });
+
 // app.get("/auth/user", async (req, res) => {
 //     res.setHeader("Access-Control-Allow-Origin", client);
 //     res.setHeader("Access-Control-Allow-Credentials", "true");
