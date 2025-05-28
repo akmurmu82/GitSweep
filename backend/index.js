@@ -43,6 +43,7 @@ app.get(
     (req, res) => {
         const token = req.user.accessToken;
         const username = req.user.profile.username;
+        // console.log("token", token)
 
         // res.cookie("accessToken", token, {
         //     httpOnly: true,
@@ -64,6 +65,7 @@ app.get(
 
 app.get("/auth/user", async (req, res) => {
     const token = req.cookies?.accessToken;
+    // console.log('token:', token)
     if (!token) return res.status(401).json({ isLoggedIn: false });
 
     try {
