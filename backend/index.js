@@ -3,11 +3,11 @@ import passport from "passport";
 import cookieParser from "cookie-parser";
 import GitHubStrategy from "passport-github2";
 import dotenv from "dotenv";
+dotenv.config()
 import cors from "cors";
 import axios from "axios";
-
 dotenv.config();
-
+console.log(process.env.BACKEND_URL)
 const app = express();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 const client = process.env.CLIENT || "http://localhost:5173";
