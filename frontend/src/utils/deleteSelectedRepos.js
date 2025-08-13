@@ -2,42 +2,39 @@ import { toast } from "react-toastify";
 import { deleteRepo } from "../redux/features/slices/repoSlice";
 
 export const deleteSelectedRepos = async (repoFullName, dispatch) => {
-    const accessToken = localStorage.getItem("accessToken");
-
-    if (!accessToken) {
-        toast.error("Authentication failed. Please log in again.");
-        return;
-    }
-
-    const confirmDelete = window.confirm(`Are you sure you want to delete "${repoFullName}"?`);
-    if (!confirmDelete) return;
-
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+    
     try {
-        const res = await fetch(`https://api.github.com/repos/${repoFullName}`, {
+        const [owner, repo] = repoFullName.split('/');
+
+        // Make the delete request through our backend
+        const response = await fetch(`${backendUrl}/repos/${owner}/${repo}`, {
             method: "DELETE",
-            headers: {
-                Authorization: `token ${accessToken}`,
-                Accept: "application/vnd.github+json",
-            },
+            credentials: 'include'
         });
 
-        if (res.ok) {
+        if (response.ok || response.status === 204) {
             toast.success(`Repository "${repoFullName}" deleted successfully.`);
-            dispatch(deleteRepo(repoFullName)); // 🔥 Updates Redux store
-        } else if (res.status === 401) {
+            dispatch(deleteRepo(repoFullName));
+            return true;
+        } else if (response.status === 401) {
             toast.error("Unauthorized! Please log in again.");
-            localStorage.removeItem("accessToken");
             window.location.reload();
-        } else if (res.status === 403) {
+            return false;
+        } else if (response.status === 403) {
             toast.error("Action forbidden! You may not have permission to delete this repository.");
-        } else if (res.status === 404) {
+            return false;
+        } else if (response.status === 404) {
             toast.error(`Repository "${repoFullName}" not found.`);
+            return false;
         } else {
-            const errorData = await res.json();
+            const errorData = await response.json().catch(() => ({}));
             toast.error(`Failed to delete: ${repoFullName}. ${errorData.message || "Unknown error."}`);
+            return false;
         }
-    } catch (err) {
-        console.error("Error deleting repo:", err);
-        toast.error("An error occurred while deleting the repository.");
+    } catch (error) {
+        console.error("Error deleting repo:", error);
+        toast.error(`An error occurred while deleting the repository: ${error.message}`);
+        return false;
     }
 };

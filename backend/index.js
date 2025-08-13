@@ -116,7 +116,10 @@ app.get("/auth/user", async (req, res) => {
 
 app.get("/repos", async (req, res) => {
     const token = req.cookies?.accessToken;
-    if (!token) return res.status(401).json({ error: "No token found" });
+    if (!token) {
+        console.warn("⚠️ [WARN] No access token found for /repos request");
+        return res.status(401).json({ error: "Authentication required" });
+    }
 
     try {
         const response = await axios.get(
@@ -126,9 +129,51 @@ app.get("/repos", async (req, res) => {
             }
         );
 
+        console.log(`✅ [INFO] Successfully fetched ${response.data.length} repositories`);
         res.json(response.data);
-    } catch (err) {
-        res.status(500).json({ error: "GitHub API error" });
+    } catch (error) {
+        console.error("❌ [ERROR] GitHub API error:", error.response?.data || error.message);
+        
+        if (error.response?.status === 401) {
+            res.status(401).json({ error: "Invalid or expired token" });
+        } else if (error.response?.status === 403) {
+            res.status(403).json({ error: "Access forbidden - insufficient permissions" });
+        } else if (error.response?.status >= 500) {
+            res.status(502).json({ error: "GitHub service unavailable" });
+        } else {
+            res.status(500).json({ error: "Failed to fetch repositories" });
+        }
+    }
+});
+
+// Add a new endpoint for deleting repositories
+app.delete("/repos/:owner/:repo", async (req, res) => {
+    const token = req.cookies?.accessToken;
+    const { owner, repo } = req.params;
+    
+    if (!token) {
+        return res.status(401).json({ error: "Authentication required" });
+    }
+
+    try {
+        const response = await axios.delete(`https://api.github.com/repos/${owner}/${repo}`, {
+            headers: { Authorization: `token ${token}` },
+        });
+
+        console.log(`✅ [INFO] Successfully deleted repository: ${owner}/${repo}`);
+        res.status(204).send();
+    } catch (error) {
+        console.error(`❌ [ERROR] Failed to delete repository ${owner}/${repo}:`, error.response?.data || error.message);
+        
+        if (error.response?.status === 401) {
+            res.status(401).json({ error: "Invalid or expired token" });
+        } else if (error.response?.status === 403) {
+            res.status(403).json({ error: "Access forbidden - you may not have permission to delete this repository" });
+        } else if (error.response?.status === 404) {
+            res.status(404).json({ error: "Repository not found" });
+        } else {
+            res.status(500).json({ error: "Failed to delete repository" });
+        }
     }
 });
 

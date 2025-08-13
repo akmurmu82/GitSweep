@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { Menu, X, Github, LogOut } from "lucide-react";
 import { setFilterType, setSearchQuery } from "./redux/features/slices/repoSlice";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
@@ -24,95 +24,112 @@ const Navbar = () => {
             })
             .catch((err) => console.log(err))
             .finally(() => setLoading(false));
-    }, []);
+    }, [dispatch]);
 
     const handleLogout = () => {
         window.open(`${backendUrl}/auth/logout`, "_self");
     };
 
-    // Loading skeleton JSX for avatar and username
     const UserSkeleton = () => (
         <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-600 animate-pulse"></div>
-            <div className="h-5 w-20 bg-gray-600 rounded animate-pulse"></div>
+            <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse"></div>
+            <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
         </div>
     );
 
     return (
-        <nav className="bg-gray-800 text-white p-4 fixed top-0 w-full shadow-md z-50">
-            <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold">GitSweep</h1>
+        <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 w-full z-40">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                    {/* Logo */}
+                    <div className="flex items-center gap-2">
+                        <Github className="h-8 w-8 text-gray-900" />
+                        <h1 className="text-xl font-bold text-gray-900">GitSweep</h1>
+                    </div>
 
-                {/* Hamburger menu for small screens */}
-                <button
-                    className="md:hidden text-2xl"
-                    onClick={() => setMenuOpen(!menuOpen)}
-                >
-                    {menuOpen ? <FaTimes /> : <FaBars />}
-                </button>
-
-                {/* Desktop user info */}
-                <div className="hidden md:flex items-center gap-3">
-                    {loading ? (
-                        <UserSkeleton />
-                    ) : user ? (
-                        <>
-                            <img
-                                src={user.avatar_url}
-                                alt={`${user.login}'s profile`}
-                                className="w-10 h-10 border rounded-full border-white"
-                            />
-                            <span className="text-sm">{user.login}</span>
-                            <button
-                                onClick={handleLogout}
-                                className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm transition"
-                            >
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            onClick={() => window.open(`${backendUrl}/auth/github`, "_self")}
-                            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm transition"
-                        >
-                            Login with GitHub
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Mobile dropdown */}
-            {menuOpen && (
-                <div className="md:hidden mt-3 flex flex-col gap-3 items-start bg-gray-700 p-4 rounded shadow-md">
-                    {loading ? (
-                        <UserSkeleton />
-                    ) : user ? (
-                        <>
-                            <div className="flex items-center gap-2">
-                                <img
-                                    src={user.avatar_url}
-                                    alt={`${user.login}'s profile`}
-                                    className="w-8 h-8 border rounded-full border-white"
-                                />
-                                <span className="text-sm">{user.login}</span>
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center gap-4">
+                        {loading ? (
+                            <UserSkeleton />
+                        ) : user ? (
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3">
+                                    <img
+                                        src={user.avatar_url}
+                                        alt={`${user.login}'s profile`}
+                                        className="w-8 h-8 rounded-full border-2 border-gray-200"
+                                    />
+                                    <div className="text-sm">
+                                        <div className="font-medium text-gray-900">{user.name || user.login}</div>
+                                        <div className="text-gray-500">@{user.login}</div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    Sign out
+                                </button>
                             </div>
+                        ) : (
                             <button
-                                onClick={handleLogout}
-                                className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm transition w-full text-left"
+                                onClick={() => window.open(`${backendUrl}/auth/github`, "_self")}
+                                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                             >
-                                Logout
+                                <Github className="h-4 w-4" />
+                                Sign in with GitHub
                             </button>
-                        </>
-                    ) : (
-                        <button
-                            onClick={() => window.open(`${backendUrl}/auth/github`, "_self")}
-                            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm transition w-full text-left"
-                        >
-                            Login with GitHub
-                        </button>
-                    )}
+                        )}
+                    </div>
+
+                    {/* Mobile menu button */}
+                    <button
+                        className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                    >
+                        {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
                 </div>
-            )}
+
+                {/* Mobile Navigation */}
+                {menuOpen && (
+                    <div className="md:hidden border-t border-gray-200 py-4">
+                        {loading ? (
+                            <UserSkeleton />
+                        ) : user ? (
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
+                                    <img
+                                        src={user.avatar_url}
+                                        alt={`${user.login}'s profile`}
+                                        className="w-10 h-10 rounded-full border-2 border-gray-200"
+                                    />
+                                    <div>
+                                        <div className="font-medium text-gray-900">{user.name || user.login}</div>
+                                        <div className="text-sm text-gray-500">@{user.login}</div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    Sign out
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => window.open(`${backendUrl}/auth/github`, "_self")}
+                                className="flex items-center gap-2 w-full bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            >
+                                <Github className="h-4 w-4" />
+                                Sign in with GitHub
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
         </nav>
     );
 };
