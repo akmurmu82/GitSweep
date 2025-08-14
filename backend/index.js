@@ -14,10 +14,10 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 const client = process.env.CLIENT || "http://localhost:5173";
 const port = process.env.PORT || 8080;
 
-console.log("🔧 Environment Configuration:");
-console.log("Backend URL:", backendUrl);
-console.log("Client URL:", client);
-console.log("Port:", port);
+// console.log("🔧 Environment Configuration:");
+// console.log("Backend URL:", backendUrl);
+// console.log("Client URL:", client);
+// console.log("Port:", port);
 
 app.use(cors({ origin: client, credentials: true }));
 app.use(cookieParser());
