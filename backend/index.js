@@ -6,13 +6,18 @@ import dotenv from "dotenv";
 dotenv.config()
 import cors from "cors";
 import axios from "axios";
-dotenv.config();
-console.log(process.env.BACKEND_URL)
+
 const app = express();
+
+// Environment configuration
 const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 const client = process.env.CLIENT || "http://localhost:5173";
-console.log("client:", client)
 const port = process.env.PORT || 8080;
+
+console.log("🔧 Environment Configuration:");
+console.log("Backend URL:", backendUrl);
+console.log("Client URL:", client);
+console.log("Port:", port);
 
 app.use(cors({ origin: client, credentials: true }));
 app.use(cookieParser());
@@ -53,9 +58,10 @@ app.get(
         // });
         res.cookie("accessToken", token, {
             httpOnly: true,
-            sameSite: "None",
-            secure: true,
+            sameSite: process.env.NODE_ENV === 'production' ? "None" : "lax",
+            secure: process.env.NODE_ENV === 'production',
             maxAge: 24 * 60 * 60 * 1000,
+            domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
         });
 
 
@@ -180,8 +186,9 @@ app.delete("/repos/:owner/:repo", async (req, res) => {
 app.get("/auth/logout", (req, res) => {
     res.clearCookie("accessToken", {
         httpOnly: true,
-        sameSite: "None",
-        secure: true,
+        sameSite: process.env.NODE_ENV === 'production' ? "None" : "lax",
+        secure: process.env.NODE_ENV === 'production',
+        domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
     });
     res.redirect(client);
 });
