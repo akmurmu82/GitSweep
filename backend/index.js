@@ -61,7 +61,7 @@ app.get(
             sameSite: process.env.NODE_ENV === 'production' ? "None" : "lax",
             secure: process.env.NODE_ENV === 'production',
             maxAge: 24 * 60 * 60 * 1000,
-            domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
+            // domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
         });
 
 
