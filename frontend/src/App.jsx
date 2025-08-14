@@ -34,6 +34,7 @@ function App() {
       .then((res) => {
         console.log("✅ Authentication check successful:", res.data);
         if (res.data.isLoggedIn) {
+          console.log(res.data)
           setUser(res.data.user);
           setAccessToken("valid");
         } else {

@@ -73,14 +73,14 @@ app.get(
 app.get("/auth/user", async (req, res) => {
     // 1. Try to extract the access token from cookies
     const token = req.cookies?.accessToken;
-    // console.log("🔍 [DEBUG] The req:",req)
-    console.log("🔍 [DEBUG] Extracted cookies:",req.cookies)
+    console.log("🔍 [DEBUG] The req.cookies:",req.cookies)
+    console.log("🔍 [DEBUG] Extracted cookies:", req.cookies)
     console.log("🔍 [DEBUG] Extracted token from cookies:", token);
 
     // 2. If no token is found, respond with unauthorized
     if (!token) {
         console.warn("⚠️ [WARN] No access token found in cookies.");
-        return res.status(401).json({ isLoggedIn: false, message: "Access token missing" });
+        return res.status(401).json({ isLoggedIn: false, message: "Access token missing", cookie: req.cookies });
     }
 
     try {
@@ -139,7 +139,7 @@ app.get("/repos", async (req, res) => {
         res.json(response.data);
     } catch (error) {
         console.error("❌ [ERROR] GitHub API error:", error.response?.data || error.message);
-        
+
         if (error.response?.status === 401) {
             res.status(401).json({ error: "Invalid or expired token" });
         } else if (error.response?.status === 403) {
@@ -156,7 +156,7 @@ app.get("/repos", async (req, res) => {
 app.delete("/repos/:owner/:repo", async (req, res) => {
     const token = req.cookies?.accessToken;
     const { owner, repo } = req.params;
-    
+
     if (!token) {
         return res.status(401).json({ error: "Authentication required" });
     }
@@ -170,7 +170,7 @@ app.delete("/repos/:owner/:repo", async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error(`❌ [ERROR] Failed to delete repository ${owner}/${repo}:`, error.response?.data || error.message);
-        
+
         if (error.response?.status === 401) {
             res.status(401).json({ error: "Invalid or expired token" });
         } else if (error.response?.status === 403) {
