@@ -28,17 +28,25 @@ function App() {
 
   // Fetch user info on initial load
   useEffect(() => {
+    console.log("🔍 Fetching user authentication status...");
     axios
       .get(`${backendUrl}/auth/user`, { withCredentials: true })
       .then((res) => {
+        console.log("✅ Authentication check successful:", res.data);
         if (res.data.isLoggedIn) {
           setUser(res.data.user);
           setAccessToken("valid");
+        } else {
+          console.log("ℹ️ User not authenticated");
         }
       })
       .catch((err) => {
-        console.log("❌ User fetch failed:", err);
-        toast.error("Failed to authenticate. Please try logging in again.");
+        console.error("❌ Authentication check failed:", err);
+        if (err.response?.status === 401) {
+          console.log("ℹ️ User not authenticated (401)");
+        } else {
+          toast.error("Failed to check authentication status. Please try refreshing the page.");
+        }
       })
       .finally(() => setUserLoading(false));
   }, []);

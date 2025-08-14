@@ -179,8 +179,9 @@ app.delete("/repos/:owner/:repo", async (req, res) => {
 
 app.get("/auth/logout", (req, res) => {
     res.clearCookie("accessToken", {
-        sameSite: "lax",
-        secure: false, // match your cookie config
+        httpOnly: true,
+        sameSite: "None",
+        secure: true,
     });
     res.redirect(client);
 });
