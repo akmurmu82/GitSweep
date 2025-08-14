@@ -49,7 +49,7 @@ app.get(
     (req, res) => {
         const token = req.user.accessToken;
         const username = req.user.profile.username;
-        // console.log("token", token)
+        console.log("token", token)
 
         // res.cookie("accessToken", token, {
         //     httpOnly: true,
@@ -73,7 +73,7 @@ app.get(
 app.get("/auth/user", async (req, res) => {
     // 1. Try to extract the access token from cookies
     const token = req.cookies?.accessToken;
-    console.log("🔍 [DEBUG] The req.cookies:",req.cookies)
+    console.log("🔍 [DEBUG] The req.cookies:", req.cookies)
     console.log("🔍 [DEBUG] Extracted cookies:", req.cookies)
     console.log("🔍 [DEBUG] Extracted token from cookies:", token);
 
@@ -101,39 +101,21 @@ app.get("/auth/user", async (req, res) => {
     }
 });
 
-// app.get("/auth/user", async (req, res) => {
-//     res.setHeader("Access-Control-Allow-Origin", client);
-//     res.setHeader("Access-Control-Allow-Credentials", "true");
-
-//     const token = req.cookies?.token; // FIX: use "token" instead of "accessToken"
-//     if (!token) return res.status(401).json({ isLoggedIn: false });
-
-//     try {
-//         const response = await axios.get("https://api.github.com/user", {
-//             headers: { Authorization: `token ${token}` },
-//         });
-
-//         res.json({ user: response.data, isLoggedIn: true });
-//     } catch (error) {
-//         res.status(401).json({ isLoggedIn: false, error: "Failed to fetch user" });
-//     }
-// });
-
-
 app.get("/repos", async (req, res) => {
+    console.log("🔎 [DEBUG] Incoming request to /repos with cookies:", req.cookies);
+
     const token = req.cookies?.accessToken;
+    console.log("🔎 [DEBUG] Extracted accessToken:", token?.substring(0, 10) + "...");
+
     if (!token) {
         console.warn("⚠️ [WARN] No access token found for /repos request");
         return res.status(401).json({ error: "Authentication required" });
     }
 
     try {
-        const response = await axios.get(
-            "https://api.github.com/user/repos?per_page=100",
-            {
-                headers: { Authorization: `token ${token}` },
-            }
-        );
+        const response = await axios.get("https://api.github.com/user/repos?per_page=100", {
+            headers: { Authorization: `token ${token}` },
+        });
 
         console.log(`✅ [INFO] Successfully fetched ${response.data.length} repositories`);
         res.json(response.data);
