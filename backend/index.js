@@ -51,11 +51,6 @@ app.get(
         const username = req.user.profile.username;
         console.log("token", token)
 
-        // res.cookie("accessToken", token, {
-        //     httpOnly: true,
-        //     sameSite: "lax", // change to "none" + secure:true if HTTPS + cross-site
-        //     secure: false,   // true in production HTTPS
-        // });
         res.cookie("accessToken", token, {
             httpOnly: true,
             sameSite: process.env.NODE_ENV === 'production' ? "None" : "lax",
