@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/api";
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 // Fetch Repos from Backend
 export const fetchRepos = createAsyncThunk("repos/fetchRepos", async (_, thunkAPI) => {
     try {
-        const response = await axios.get(`${backendUrl}/repos`, {
-            withCredentials: true,
-        });
+        const response = await api.get('/repos');
         return response.data;
     } catch (error) {
         console.error("❌ Failed to fetch repos:", error);

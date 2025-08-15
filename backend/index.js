@@ -105,27 +105,35 @@ app.get(
         console.log(`🍪 Cookie set with options:`, cookieOptions);
 
         console.log(`🔑 GitHub Login: ${username}`);
-        res.redirect(`${client}/dashboard`);
+        // Redirect with token in URL for localStorage storage
+        res.redirect(`${client}/auth/callback?token=${encodeURIComponent(token)}`);
     }
 );
 
 app.get("/auth/user", async (req, res) => {
-    // 1. Try to extract the access token from cookies
-    const token = req.cookies?.accessToken;
+    // 1. Try to extract the access token from cookies first, then from Authorization header
+    const cookieToken = req.cookies?.accessToken;
+    const headerToken = req.headers.authorization?.replace('Bearer ', '');
+    const token = headerToken || cookieToken;
+    
     console.log("🔍 [DEBUG] Request headers:", req.headers);
     console.log("🔍 [DEBUG] Cookie header:", req.headers.cookie);
     console.log("🔍 [DEBUG] Parsed cookies:", req.cookies);
-    console.log("🔍 [DEBUG] Extracted token from cookies:", token);
+    console.log("🔍 [DEBUG] Authorization header:", req.headers.authorization);
+    console.log("🔍 [DEBUG] Extracted token from cookies:", cookieToken);
+    console.log("🔍 [DEBUG] Extracted token from header:", headerToken);
+    console.log("🔍 [DEBUG] Final token used:", token?.substring(0, 10) + "...");
 
     // 2. If no token is found, respond with unauthorized
     if (!token) {
         console.warn("⚠️ [WARN] No access token found in cookies.");
         return res.status(401).json({ 
             isLoggedIn: false, 
-            message: "Access token missing", 
+            message: "Access token missing from both cookies and headers", 
             debug: {
                 cookies: req.cookies,
                 cookieHeader: req.headers.cookie,
+                authHeader: req.headers.authorization,
                 origin: req.headers.origin,
                 userAgent: req.headers['user-agent']
             }
@@ -153,11 +161,16 @@ app.get("/auth/user", async (req, res) => {
 app.get("/repos", async (req, res) => {
     console.log("🔎 [DEBUG] Incoming request to /repos with cookies:", req.cookies);
 
-    const token = req.cookies?.accessToken;
-    console.log("🔎 [DEBUG] Extracted accessToken:", token?.substring(0, 10) + "...");
+    const cookieToken = req.cookies?.accessToken;
+    const headerToken = req.headers.authorization?.replace('Bearer ', '');
+    const token = headerToken || cookieToken;
+    
+    console.log("🔎 [DEBUG] Cookie token:", cookieToken?.substring(0, 10) + "...");
+    console.log("🔎 [DEBUG] Header token:", headerToken?.substring(0, 10) + "...");
+    console.log("🔎 [DEBUG] Final token used:", token?.substring(0, 10) + "...");
 
     if (!token) {
-        console.warn("⚠️ [WARN] No access token found for /repos request");
+        console.warn("⚠️ [WARN] No access token found in cookies or headers for /repos request");
         return res.status(401).json({ error: "Authentication required" });
     }
 
@@ -185,7 +198,9 @@ app.get("/repos", async (req, res) => {
 
 // Add a new endpoint for deleting repositories
 app.delete("/repos/:owner/:repo", async (req, res) => {
-    const token = req.cookies?.accessToken;
+    const cookieToken = req.cookies?.accessToken;
+    const headerToken = req.headers.authorization?.replace('Bearer ', '');
+    const token = headerToken || cookieToken;
     const { owner, repo } = req.params;
 
     if (!token) {

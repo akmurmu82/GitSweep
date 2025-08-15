@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "./utils/api";
 import Navbar from "./Navbar";
 import RepoCard from "./components/RepoCard";
 import RepoModal from "./components/RepoModal";
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchRepos } from "./redux/features/slices/repoSlice";
 import RepoCardSkeleton from "./components/RepoCardSkeleton";
 import { AlertTriangle, Github } from "lucide-react";
+import AuthCallback from "./components/AuthCallback";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
@@ -26,20 +27,38 @@ function App() {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Handle auth callback
+  if (window.location.pathname === '/auth/callback') {
+    return <AuthCallback />;
+  }
+
   // Fetch user info on initial load
   useEffect(() => {
+    // Check if we have a token in localStorage first
+    const storedToken = localStorage.getItem('accessToken');
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedToken && storedUser) {
+      console.log('🔑 Found stored token and user, using localStorage');
+      setAccessToken(storedToken);
+      setUser(JSON.parse(storedUser));
+      setUserLoading(false);
+      return;
+    }
+
     console.log("🔍 Fetching user authentication status...");
     console.log("🔍 Backend URL:", backendUrl);
     console.log("🔍 Current origin:", window.location.origin);
     
-    axios
-      .get(`${backendUrl}/auth/user`, { withCredentials: true })
+    api
+      .get('/auth/user')
       .then((res) => {
         console.log("✅ Authentication check successful:", res.data);
         if (res.data.isLoggedIn) {
-          console.log(res.data)
+          console.log('💾 Storing user data in localStorage');
           setUser(res.data.user);
-          setAccessToken("valid");
+          setAccessToken(localStorage.getItem('accessToken') || "valid");
+          localStorage.setItem('user', JSON.stringify(res.data.user));
         } else {
           console.log("ℹ️ User not authenticated");
         }
@@ -49,6 +68,9 @@ function App() {
         console.error("❌ Error response:", err.response?.data);
         if (err.response?.status === 401) {
           console.log("ℹ️ User not authenticated (401)");
+          // Clear any stale data
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('user');
         } else {
           toast.error("Failed to check authentication status. Please try refreshing the page.");
         }
@@ -93,7 +115,7 @@ function App() {
     const loadingToast = toast.info(`Archiving ${repoFullName}...`, { autoClose: false });
     
     try {
-      const token = accessToken;
+      const token = localStorage.getItem('accessToken');
       const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
         method: "PATCH",
         headers: {

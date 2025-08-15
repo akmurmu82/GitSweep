@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "./utils/api";
 import { useDispatch } from "react-redux";
 import { Menu, X, Github, LogOut } from "lucide-react";
 import { setFilterType, setSearchQuery } from "./redux/features/slices/repoSlice";
@@ -13,11 +13,22 @@ const Navbar = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios
-            .get(`${backendUrl}/auth/user`, { withCredentials: true })
+        // Check localStorage first
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            setLoading(false);
+            dispatch(setFilterType("all"));
+            dispatch(setSearchQuery(""));
+            return;
+        }
+
+        api
+            .get('/auth/user')
             .then((res) => {
                 if (res.data.isLoggedIn) {
                     setUser(res.data.user);
+                    localStorage.setItem('user', JSON.stringify(res.data.user));
                     dispatch(setFilterType("all"));
                     dispatch(setSearchQuery(""));
                 }
@@ -27,6 +38,10 @@ const Navbar = () => {
     }, [dispatch]);
 
     const handleLogout = () => {
+        // Clear localStorage
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        
         window.open(`${backendUrl}/auth/logout`, "_self");
     };
 
