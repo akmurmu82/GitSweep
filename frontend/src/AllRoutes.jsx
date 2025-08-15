@@ -1,7 +1,5 @@
 // src/AllRoutes.jsx
 import { Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import Dashboard from "./pages/Dashboard";
 import App from "./App";
 import AuthCallback from "./components/AuthCallback";
 
