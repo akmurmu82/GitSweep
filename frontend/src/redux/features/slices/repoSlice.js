@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../utils/api";
+import api from "../../../utils/api";
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 // Fetch Repos from Backend
