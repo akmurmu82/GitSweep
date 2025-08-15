@@ -12,6 +12,7 @@ import { fetchRepos } from "./redux/features/slices/repoSlice";
 import RepoCardSkeleton from "./components/RepoCardSkeleton";
 import { AlertTriangle, Github } from "lucide-react";
 import AuthCallback from "./components/AuthCallback";
+import TokenHandler from "./components/AuthCallback";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
@@ -27,11 +28,11 @@ function App() {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Handle auth callback
-  console.log("Checkig pathame")
-  if (window.location.pathname === '/auth/callback') {
-    return <AuthCallback />;
-  }
+  // // Handle auth callback
+  // console.log("Checkig pathame")
+  // if (window.location.pathname === '/auth/callback') {
+  //   return <AuthCallback />;
+  // }
 
   // Fetch user info on initial load
   useEffect(() => {
@@ -197,6 +198,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+      <TokenHandler />
       <ToastContainer
         position="top-right"
         autoClose={3000}

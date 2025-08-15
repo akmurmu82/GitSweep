@@ -1,34 +1,21 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// App.tsx or a small component mounted at root
+import { useEffect } from "react";
 
-const AuthCallback = () => {
-  const navigate = useNavigate();
 
+function TokenHandler() {
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    console.log(token)
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
 
     if (token) {
-      console.log('🔑 Storing token in localStorage');
-      localStorage.setItem('accessToken', token);
-      
-      // Redirect to dashboard
-      navigate('/dashboard', { replace: true });
-    } else {
-      console.error('❌ No token found in callback URL');
-      navigate('/', { replace: true });
+      localStorage.setItem("token", token);
+      // clean up the URL
+      window.history.replaceState({}, document.title, "/dashboard");
     }
-  }, [navigate]);
+  }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Completing authentication...</p>
-      </div>
-    </div>
-  );
-};
+  return null;
+}
 
-export default AuthCallback;
+
+export default TokenHandler;
