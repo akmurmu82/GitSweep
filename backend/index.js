@@ -14,12 +14,47 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 const client = process.env.CLIENT || "http://localhost:5173";
 const port = process.env.PORT || 8080;
 
-// console.log("🔧 Environment Configuration:");
-// console.log("Backend URL:", backendUrl);
-// console.log("Client URL:", client);
-// console.log("Port:", port);
+console.log("🔧 Environment Configuration:");
+console.log("Backend URL:", backendUrl);
+console.log("Client URL:", client);
+console.log("Port:", port);
+console.log("NODE_ENV:", process.env.NODE_ENV);
 
-app.use(cors({ origin: client, credentials: true }));
+// Enhanced CORS configuration for production
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        
+        // In development, allow the configured client
+        if (process.env.NODE_ENV !== 'production') {
+            if (origin === client) {
+                return callback(null, true);
+            }
+        } else {
+            // In production, be more flexible with subdomains
+            const allowedOrigins = [
+                client,
+                // Add your actual production frontend URLs here
+                'https://your-frontend-url.vercel.app',
+                'https://your-frontend-url.netlify.app'
+            ];
+            
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+        }
+        
+        console.warn(`🚫 CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie']
+};
+
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(passport.initialize());
 
@@ -51,14 +86,23 @@ app.get(
         const username = req.user.profile.username;
         console.log("token", token)
 
-        res.cookie("accessToken", token, {
+        // Enhanced cookie configuration for production
+        const cookieOptions = {
             httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? "None" : "lax",
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000,
-            // domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
-        });
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        };
 
+        if (process.env.NODE_ENV === 'production') {
+            cookieOptions.sameSite = "None";
+            cookieOptions.secure = true;
+            // Don't set domain for Render.com - let it default
+        } else {
+            cookieOptions.sameSite = "lax";
+            cookieOptions.secure = false;
+        }
+        res.cookie("accessToken", token, cookieOptions);
+
+        console.log(`🍪 Cookie set with options:`, cookieOptions);
 
         console.log(`🔑 GitHub Login: ${username}`);
         res.redirect(`${client}/dashboard`);
@@ -68,14 +112,24 @@ app.get(
 app.get("/auth/user", async (req, res) => {
     // 1. Try to extract the access token from cookies
     const token = req.cookies?.accessToken;
-    console.log("🔍 [DEBUG] The req.cookies:", req.cookies)
-    console.log("🔍 [DEBUG] Extracted cookies:", req.cookies)
+    console.log("🔍 [DEBUG] Request headers:", req.headers);
+    console.log("🔍 [DEBUG] Cookie header:", req.headers.cookie);
+    console.log("🔍 [DEBUG] Parsed cookies:", req.cookies);
     console.log("🔍 [DEBUG] Extracted token from cookies:", token);
 
     // 2. If no token is found, respond with unauthorized
     if (!token) {
         console.warn("⚠️ [WARN] No access token found in cookies.");
-        return res.status(401).json({ isLoggedIn: false, message: "Access token missing", cookie: req.cookies });
+        return res.status(401).json({ 
+            isLoggedIn: false, 
+            message: "Access token missing", 
+            debug: {
+                cookies: req.cookies,
+                cookieHeader: req.headers.cookie,
+                origin: req.headers.origin,
+                userAgent: req.headers['user-agent']
+            }
+        });
     }
 
     try {
@@ -161,12 +215,20 @@ app.delete("/repos/:owner/:repo", async (req, res) => {
 });
 
 app.get("/auth/logout", (req, res) => {
-    res.clearCookie("accessToken", {
+    const clearCookieOptions = {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? "None" : "lax",
-        secure: process.env.NODE_ENV === 'production',
-        domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
-    });
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+        clearCookieOptions.sameSite = "None";
+        clearCookieOptions.secure = true;
+    } else {
+        clearCookieOptions.sameSite = "lax";
+        clearCookieOptions.secure = false;
+    }
+    res.clearCookie("accessToken", clearCookieOptions);
+    
+    console.log(`🍪 Cookie cleared with options:`, clearCookieOptions);
     res.redirect(client);
 });
 

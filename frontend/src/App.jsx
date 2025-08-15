@@ -29,6 +29,9 @@ function App() {
   // Fetch user info on initial load
   useEffect(() => {
     console.log("🔍 Fetching user authentication status...");
+    console.log("🔍 Backend URL:", backendUrl);
+    console.log("🔍 Current origin:", window.location.origin);
+    
     axios
       .get(`${backendUrl}/auth/user`, { withCredentials: true })
       .then((res) => {
@@ -43,6 +46,7 @@ function App() {
       })
       .catch((err) => {
         console.error("❌ Authentication check failed:", err);
+        console.error("❌ Error response:", err.response?.data);
         if (err.response?.status === 401) {
           console.log("ℹ️ User not authenticated (401)");
         } else {
