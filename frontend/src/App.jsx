@@ -28,6 +28,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Handle auth callback
+  console.log("Checkig pathame")
   if (window.location.pathname === '/auth/callback') {
     return <AuthCallback />;
   }
@@ -37,7 +38,7 @@ function App() {
     // Check if we have a token in localStorage first
     const storedToken = localStorage.getItem('accessToken');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       console.log('🔑 Found stored token and user, using localStorage');
       setAccessToken(storedToken);
@@ -49,7 +50,7 @@ function App() {
     console.log("🔍 Fetching user authentication status...");
     console.log("🔍 Backend URL:", backendUrl);
     console.log("🔍 Current origin:", window.location.origin);
-    
+
     api
       .get('/auth/user')
       .then((res) => {
@@ -95,7 +96,7 @@ function App() {
 
   const handleDelete = async (repoFullName) => {
     const loadingToast = toast.info(`Deleting ${repoFullName}...`, { autoClose: false });
-    
+
     try {
       await deleteSelectedRepos(repoFullName, dispatch);
       toast.dismiss(loadingToast);
@@ -113,7 +114,7 @@ function App() {
 
   const handleArchive = async (repoFullName) => {
     const loadingToast = toast.info(`Archiving ${repoFullName}...`, { autoClose: false });
-    
+
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
@@ -196,8 +197,8 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <ToastContainer 
-        position="top-right" 
+      <ToastContainer
+        position="top-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop
@@ -219,7 +220,7 @@ function App() {
         </div>
 
         {/* Filter and Search Section */}
-        <FilterBar 
+        <FilterBar
           filter={filter}
           setFilter={setFilter}
           searchQuery={searchQuery}
@@ -257,9 +258,9 @@ function App() {
           ) : filteredRepos.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRepos.map((repo) => (
-                <RepoCard 
-                  key={repo.id} 
-                  repo={repo} 
+                <RepoCard
+                  key={repo.id}
+                  repo={repo}
                   onClick={() => handleRepoClick(repo)}
                 />
               ))}
