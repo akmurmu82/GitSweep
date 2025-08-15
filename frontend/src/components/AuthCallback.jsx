@@ -7,6 +7,7 @@ const AuthCallback = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
+    console.log(token)
 
     if (token) {
       console.log('🔑 Storing token in localStorage');
