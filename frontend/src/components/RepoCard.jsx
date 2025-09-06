@@ -40,34 +40,34 @@ function RepoCard({ repo, onClick }) {
       onClick={onClick}
       className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer group"
     >
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Header with name and visibility */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-2 sm:gap-0">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
               {repo.name}
             </h3>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-1 mt-1">
               {repo.private ? (
-                <div className="flex items-center gap-1 text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
-                  <EyeOff className="h-3 w-3" />
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">
+                  <EyeOff className="h-3 w-3 sm:h-3 sm:w-3" />
                   Private
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                  <Eye className="h-3 w-3" />
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full">
+                  <Eye className="h-3 w-3 sm:h-3 sm:w-3" />
                   Public
                 </div>
               )}
               {repo.fork && (
-                <div className="flex items-center gap-1 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full">
-                  <GitFork className="h-3 w-3" />
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                  <GitFork className="h-3 w-3 sm:h-3 sm:w-3" />
                   Fork
                 </div>
               )}
               {repo.archived && (
-                <div className="flex items-center gap-1 text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded-full">
-                  <Archive className="h-3 w-3" />
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                  <Archive className="h-3 w-3 sm:h-3 sm:w-3" />
                   Archived
                 </div>
               )}
@@ -76,43 +76,44 @@ function RepoCard({ repo, onClick }) {
         </div>
 
         {/* Description */}
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+        <p className="text-gray-600 text-[12px] sm:text-sm mb-4 line-clamp-2">
           {repo.description || "No description available"}
         </p>
 
         {/* Stats */}
-        <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 text-[10px] sm:text-sm text-gray-500">
           <div className="flex items-center gap-1">
-            <Star className="h-4 w-4" />
+            <Star className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>{repo.stargazers_count || 0}</span>
           </div>
           <div className="flex items-center gap-1">
-            <GitFork className="h-4 w-4" />
+            <GitFork className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>{repo.forks_count || 0}</span>
           </div>
           {repo.language && (
             <div className="flex items-center gap-1">
               <div
-                className="w-3 h-3 rounded-full"
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
                 style={{ backgroundColor: getLanguageColor(repo.language) }}
               />
-              <span>{repo.language}</span>
+              <span className="text-[10px] sm:text-sm">{repo.language}</span>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[10px] sm:text-xs text-gray-500 pt-3 sm:pt-4 border-t border-gray-100 gap-1 sm:gap-0">
           <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+            <Calendar className="h-3 w-3 sm:h-3 sm:w-3" />
             <span>Updated {formatDate(repo.updated_at)}</span>
           </div>
-          <div className="text-gray-400">
+          <div className="text-gray-400 text-[9px] sm:text-xs">
             Click to view details
           </div>
         </div>
       </div>
     </div>
+
   );
 }
 
