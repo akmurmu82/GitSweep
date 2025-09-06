@@ -33,7 +33,7 @@ const Navbar = () => {
                     dispatch(setSearchQuery(""));
                 }
             })
-            .catch((err) => console.log(err))
+            .catch((err) => { console.log(err) })
             .finally(() => setLoading(false));
     }, [dispatch]);
 
@@ -41,7 +41,7 @@ const Navbar = () => {
         // Clear localStorage
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
-        
+
         window.open(`${backendUrl}/auth/logout`, "_self");
     };
 
